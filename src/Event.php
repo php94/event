@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PHPAPP\Event;
+namespace PHP94\Event;
 
 use Fig\EventDispatcher\AggregateProvider;
 use Psr\EventDispatcher\EventDispatcherInterface;
