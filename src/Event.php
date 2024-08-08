@@ -11,8 +11,18 @@ use Psr\EventDispatcher\StoppableEventInterface;
 
 class Event extends AggregateProvider implements EventDispatcherInterface, ListenerProviderInterface
 {
+    private $listeners = [];
+
     public function dispatch(object $event)
     {
+        foreach ($this->listeners as $vo) {
+            if (is_a($event, $vo['event'])) {
+                if ($event instanceof StoppableEventInterface && $event->isPropagationStopped()) {
+                    return $event;
+                }
+                call_user_func($vo['callback'], $event);
+            }
+        }
         foreach ($this->getListenersForEvent($event) as $listener) {
             if ($event instanceof StoppableEventInterface && $event->isPropagationStopped()) {
                 return $event;
@@ -20,5 +30,14 @@ class Event extends AggregateProvider implements EventDispatcherInterface, Liste
             call_user_func($listener, $event);
         }
         return $event;
+    }
+
+    public function listen(string $event, callable $callback): self
+    {
+        $this->listeners[] = [
+            'event' => $event,
+            'callback' => $callback
+        ];
+        return $this;
     }
 }
